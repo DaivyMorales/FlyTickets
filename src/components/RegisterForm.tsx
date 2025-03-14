@@ -1,10 +1,23 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useFormik } from "formik";
-import { signIn, useSession, signOut } from "next-auth/react";
-import axios from "axios";
-import router from "next/router";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
+import { LuUser } from "react-icons/lu";
 
 function RegisterForm() {
+  const { data: session, status } = useSession() as {
+    data: { user: { name: string } } | null;
+    status: string;
+  };
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.push("/");
+    }
+  }, [status, router]);
+
   const formik = useFormik({
     initialValues: {
       name: "",
@@ -14,98 +27,147 @@ function RegisterForm() {
     onSubmit: async (values) => {
       console.log(values);
 
-      const body = {
-        name: values.name,
-        email: values.email,
-        password: values.password,
-      };
+      // const res = await signIn("credentials", {
+      //   email: values.email,
+      //   password: values.password,
+      //   redirect: false,
+      // });
 
-      const response = await axios.post("/api/user", body);
-
-      const res = await signIn("credentials", {
-        email: response.data.email,
-        password: values.password,
-        redirect: false,
-      });
-
-      console.log("res", res);
-
-      if (res?.ok) return router.push("/");
-
-      console.log(response);
+      // if (res?.error) {
+      //   console.error("Failed to sign in:", res.error);
+      // } else {
+      //   router.push("/");
+      // }
     },
   });
 
-  //   const { data: session, status } = useSession();
-  //   console.log("useSession:", session, status);
+  if (status === "loading" || status === "authenticated") {
+    return <div>Loading...</div>;
+  }
+
+  // console.log("useSession:", session);
 
   return (
-    <div className="flex h-screen w-screen items-center justify-center">
-      {/* <div>{session?.user.name}</div> */}
-      <button onClick={() => signOut()}>Log Out</button>
-      <form
-        onSubmit={formik.handleSubmit}
-        className="w-full max-w-sm rounded bg-white p-6"
-      >
-        <h2 className="mb-4 text-2xl font-bold">Registra una cuenta</h2>
-        <div className="mb-4">
-          <label
-            className="mb-2 block text-sm font-bold text-gray-700"
-            htmlFor="name"
-          >
-            Nombre
-          </label>
+    <form
+      onSubmit={formik.handleSubmit}
+      className="flex w-[430px] max-w-sm flex-col items-center justify-center gap-4 rounded p-6"
+    >
+      <div className="flex w-full flex-col">
+        <label
+          className="mb-2 block text-xs font-medium text-neutral-300"
+          htmlFor="password"
+        >
+          Nombre
+        </label>
+        <label className="input validator w-full bg-zinc-900">
+          <LuUser className="text-zinc-400" />
           <input
-            className="focus:-outline w-full appearance-none rounded border px-3 py-2 leading-tight text-gray-700 focus:outline-none"
+            className="input-sm"
             id="name"
             onChange={formik.handleChange}
-            type="text"
+            type="name"
             name="name"
-            placeholder="Jhon Doe"
+            placeholder="Tim Cook"
+            required
           />
-        </div>
-        <div className="mb-4">
-          <label
-            className="mb-2 block text-sm font-bold text-gray-700"
-            htmlFor="email"
+        </label>
+        <p className="validator-hint hidden text-xs">
+          Debe ser de 3 a 30 caracteres
+          <br />
+          conteniendo solo letras, numeros o guiones
+        </p>
+      </div>
+      <div className="flex w-full flex-col">
+        <label
+          className="mb-2 block text-xs font-medium text-neutral-300"
+          htmlFor="password"
+        >
+          Correo electronico*
+        </label>
+        <label className="input validator w-full bg-zinc-900">
+          <svg
+            className="h-[1em] opacity-50"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
           >
-            Email
-          </label>
+            <g
+              strokeLinejoin="round"
+              strokeLinecap="round"
+              strokeWidth="2.5"
+              fill="none"
+              stroke="currentColor"
+            >
+              <rect width="20" height="16" x="2" y="4" rx="2"></rect>
+              <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+            </g>
+          </svg>
           <input
-            className="focus:-outline w-full appearance-none rounded border px-3 py-2 leading-tight text-gray-700 focus:outline-none"
+            className="input-sm"
             id="email"
             onChange={formik.handleChange}
             type="email"
             name="email"
-            placeholder="Email"
+            placeholder="my@email.com"
+            required
           />
-        </div>
-        <div className="mb-6">
-          <label
-            className="mb-2 block text-sm font-bold text-gray-700"
-            htmlFor="password"
+        </label>
+        <div className="validator-hint hidden text-xs">Ingresa tu correo</div>
+      </div>
+
+      <div className="w-full">
+        <label
+          className="mb-2 block text-xs font-medium text-neutral-300"
+          htmlFor="password"
+        >
+          Contraseña*
+        </label>
+        <label className="input validator w-full bg-zinc-900">
+          <svg
+            className="h-[1em] opacity-50"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
           >
-            Password
-          </label>
+            <g
+              strokeLinejoin="round"
+              strokeLinecap="round"
+              strokeWidth="2.5"
+              fill="none"
+              stroke="currentColor"
+            >
+              <path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"></path>
+              <circle cx="16.5" cy="7.5" r=".5" fill="currentColor"></circle>
+            </g>
+          </svg>
           <input
-            name="password"
-            onChange={formik.handleChange}
-            className="focus:-outline mb-3 w-full appearance-none rounded border px-3 py-2 leading-tight text-gray-700 focus:outline-none"
-            id="password"
+            className="input-sm"
             type="password"
-            placeholder="Password"
+            required
+            placeholder="*******"
+            name="password"
+            id="password"
+            onChange={formik.handleChange}
+            minLength={8}
+            pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+            title="Must be more than 8 characters, including number, lowercase letter, uppercase letter"
           />
-        </div>
-        <div className="flex items-center justify-between">
-          <button
-            className="focus:-outline rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none"
-            type="submit"
-          >
-            Sign In
-          </button>
-        </div>
-      </form>
-    </div>
+        </label>
+        <p className="validator-hint hidden text-xs">
+          Debe tener más de 8 caracteres, incluidos
+          <br />
+          Al menos un número
+          <br />
+          Al menos una letra minúscula
+          <br />
+          Al menos una letra mayúscula
+        </p>
+      </div>
+      <div className="flex w-full items-center justify-between gap-4">
+        <button type="submit" className="btn w-full bg-blue-700 text-xs">
+          Crear Cuenta
+        </button>
+      </div>
+      {/* <button onClick={() => signIn("github")}>Sign In with GitHub</button> */}
+    </form>
   );
 }
 
