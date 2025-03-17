@@ -1,11 +1,14 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { LuUser } from "react-icons/lu";
+import { api } from "@/utils/api";
+import axios from "axios";
 
 function RegisterForm() {
+  const [isLoading, setIsLoading] = useState(false);
   const { data: session, status } = useSession() as {
     data: { user: { name: string } } | null;
     status: string;
@@ -25,19 +28,29 @@ function RegisterForm() {
       password: "",
     },
     onSubmit: async (values) => {
-      console.log(values);
+      setIsLoading(true);
+      try {
+        console.log(values);
+        const response = await axios.post("/api/user", values);
 
-      // const res = await signIn("credentials", {
-      //   email: values.email,
-      //   password: values.password,
-      //   redirect: false,
-      // });
+        if (response.status === 200) {
+          const res = await signIn("credentials", {
+            email: values.email,
+            password: values.password,
+            redirect: false,
+          });
 
-      // if (res?.error) {
-      //   console.error("Failed to sign in:", res.error);
-      // } else {
-      //   router.push("/");
-      // }
+          if (res?.error) {
+            console.error("Failed to sign in:", res.error);
+          } else {
+            router.push("/");
+          }
+        }
+      } catch (error) {
+        console.error("Registration error:", error);
+      } finally {
+        setIsLoading(false);
+      }
     },
   });
 
@@ -52,6 +65,7 @@ function RegisterForm() {
       onSubmit={formik.handleSubmit}
       className="flex w-[430px] max-w-sm flex-col items-center justify-center gap-4 rounded p-6"
     >
+      <div></div>
       <div className="flex w-full flex-col">
         <label
           className="mb-2 block text-xs font-medium text-neutral-300"
@@ -162,8 +176,19 @@ function RegisterForm() {
         </p>
       </div>
       <div className="flex w-full items-center justify-between gap-4">
-        <button type="submit" className="btn w-full bg-blue-700 text-xs">
-          Crear Cuenta
+        <button 
+          type="submit" 
+          className="btn w-full bg-blue-700 text-xs"
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <>
+              <span className="loading loading-spinner loading-xs"></span>
+              Creando...
+            </>
+          ) : (
+            'Crear Cuenta'
+          )}
         </button>
       </div>
       {/* <button onClick={() => signIn("github")}>Sign In with GitHub</button> */}

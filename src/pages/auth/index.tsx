@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import { signIn, signOut, getSession } from "next-auth/react";
 import { useRouter } from "next/router";
@@ -11,6 +11,8 @@ import LoginForm from "@/components/LoginForm";
 import RegisterForm from "@/components/RegisterForm";
 
 function Auth() {
+  const [registerScreen, setRegisterScreen] = useState(false);
+
   const { data: session, status } = useSession() as {
     data: { user: { name: string } } | null;
     status: string;
@@ -23,33 +25,11 @@ function Auth() {
     }
   }, [status, router]);
 
-  const formik = useFormik({
-    initialValues: {
-      email: "",
-      password: "",
-    },
-    onSubmit: async (values) => {
-      console.log(values);
-
-      const res = await signIn("credentials", {
-        email: values.email,
-        password: values.password,
-        redirect: false,
-      });
-
-      if (res?.error) {
-        console.error("Failed to sign in:", res.error);
-      } else {
-        router.push("/");
-      }
-    },
-  });
-
   if (status === "loading" || status === "authenticated") {
     return <div>Loading...</div>;
   }
 
-  console.log("useSession:", session);
+  
 
   return (
     <div className="flex h-screen w-screen items-center justify-center bg-zinc-800">
@@ -58,10 +38,15 @@ function Auth() {
           <PiAirplaneFill size={30} className="text-blue-600" />
           <h2 className="mb-4 text-2xl font-bold">Ingresa a FlyTickets</h2>
         </div>
-        <RegisterForm />
+        {registerScreen ? <LoginForm /> : <RegisterForm />}
         <div className="divider text-xs"></div>
-        <button className="btn w-full bg-zinc-700 text-xs">
-          Crear Nueva Cuenta
+        <button
+          onClick={() => {
+            setRegisterScreen(!registerScreen);
+          }}
+          className="btn w-full bg-zinc-700 text-xs"
+        >
+          {registerScreen ? "Crear Nueva Cuenta" : "Iniciar Sesión"}
         </button>
       </div>
     </div>
