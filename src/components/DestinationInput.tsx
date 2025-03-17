@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import { PiAirplaneLandingFill } from 'react-icons/pi';
+import { useState, useEffect, useRef } from "react";
+import { PiAirplaneLandingFill } from "react-icons/pi";
 
 type City = {
   city: string;
@@ -8,7 +8,7 @@ type City = {
 };
 
 export default function DestinationInput() {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [results, setResults] = useState<City[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -27,25 +27,28 @@ export default function DestinationInput() {
           `https://wft-geo-db.p.rapidapi.com/v1/geo/cities?namePrefix=${query}&limit=5&languageCode=es`,
           {
             headers: {
-              'X-RapidAPI-Key': '9810e3a8cdmsh69731c78e1ce926p1c86a7jsn46c865c06eaf',
-              'X-RapidAPI-Host': 'wft-geo-db.p.rapidapi.com'
-            }
-          }
+              "X-RapidAPI-Key":
+                "9810e3a8cdmsh69731c78e1ce926p1c86a7jsn46c865c06eaf",
+              "X-RapidAPI-Host": "wft-geo-db.p.rapidapi.com",
+            },
+          },
         );
         const data = await response.json();
         // Validate that data and data.data exist and is an array
         if (data && Array.isArray(data.data)) {
-          const countries = new Intl.DisplayNames(['es'], { type: 'region' });
-          setResults(data.data.map((item: any) => ({
-            city: item.city,
-            country: countries.of(item.countryCode) || item.country,
-            countryCode: item.countryCode
-          })));
+          const countries = new Intl.DisplayNames(["es"], { type: "region" });
+          setResults(
+            data.data.map((item: any) => ({
+              city: item.city,
+              country: countries.of(item.countryCode) || item.country,
+              countryCode: item.countryCode,
+            })),
+          );
         } else {
           setResults([]);
         }
       } catch (error) {
-        console.error('Error al buscar ciudades:', error);
+        console.error("Error al buscar ciudades:", error);
         setResults([]);
       } finally {
         setLoading(false);
@@ -58,7 +61,13 @@ export default function DestinationInput() {
 
   return (
     <div className="relative w-full">
-      <label className="input w-full bg-zinc-900 relative rounded-r-md">
+      <label
+        className="text-neutral-300 mb-2 block text-xs font-medium"
+        htmlFor="password"
+      >
+        Destino
+      </label>
+      <label className="input relative w-full rounded-r-md bg-zinc-900">
         <PiAirplaneLandingFill />
         <input
           ref={inputRef}
@@ -70,21 +79,23 @@ export default function DestinationInput() {
             setIsOpen(true);
           }}
           onFocus={() => setIsOpen(true)}
-          placeholder="Destino"
+          placeholder="Tokyo, Japón"
           required
         />
       </label>
 
       {isOpen && (query.length > 1 || loading) && (
-        <div className="absolute mt-1 w-full rounded-md bg-zinc-800 shadow-lg max-h-60 overflow-auto z-10">
+        <div className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-b-md border-[1px] border-zinc-700 bg-zinc-800 shadow-lg">
           {loading && (
-            <div className="px-4 py-2 text-sm text-gray-400">Cargando...</div>
+            <div className="px-4 py-2 text-xs font-bold text-white">
+              Cargando...
+            </div>
           )}
           {!loading &&
             results.map((city, index) => (
               <div
                 key={index}
-                className="px-4 py-2 text-xs hover:bg-zinc-700 cursor-pointer"
+                className="cursor-pointer px-4 py-2 text-xs hover:bg-zinc-700"
                 onClick={() => {
                   setQuery(`${city.city}, ${city.country}`);
                   setIsOpen(false);

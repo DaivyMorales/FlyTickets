@@ -5,3 +5,29 @@
 @plugin "daisyui" {
   themes: light --default, dark --prefersdark, dark;
 }
+
+/* DatePicker custom styles */
+.react-datepicker {
+  @apply bg-zinc-800 border-zinc-700 text-white !important;
+}
+
+.react-datepicker__header {
+  @apply bg-zinc-900 border-zinc-700 !important;
+}
+
+.react-datepicker__current-month,
+.react-datepicker__day-name {
+  @apply text-white !important;
+}
+
+.react-datepicker__day {
+  @apply text-white hover:bg-zinc-700 !important;
+}
+
+.react-datepicker__day--selected {
+  @apply bg-blue-500 hover:bg-blue-600 !important;
+}
+
+.react-datepicker__day--disabled {
+  @apply text-zinc-500 !important;
+}
