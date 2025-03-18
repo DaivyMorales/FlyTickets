@@ -5,6 +5,7 @@ import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
 import { PiAirplaneTakeoffFill, PiCalendarDotsFill } from "react-icons/pi";
+import ModalCategory from "./ModalCategory";
 
 const HomePage = () => {
   const { data: session, status } = useSession();
@@ -67,7 +68,7 @@ const HomePage = () => {
   if (status === "authenticated") {
     return (
       <div className="flex min-h-screen items-center justify-center gap-4 bg-zinc-800">
-        <div className="flex gap-4 justify-end items-end">
+        <div className="flex-cols flex items-end justify-end gap-4">
           <div className="rounded-[100px] join">
             <OriginInput />
             <DestinationInput />
@@ -130,6 +131,7 @@ const HomePage = () => {
               </p>
             )}
           </div>
+          <ModalCategory />
           <button className="btn w-[170px] rounded-md bg-blue-700 text-xs">
             Buscar
           </button>
