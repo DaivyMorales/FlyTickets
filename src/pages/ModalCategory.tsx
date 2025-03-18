@@ -15,7 +15,7 @@ function ModalCategory() {
         Categoría
       </label>
       <button
-        className="input w-[100px] cursor-pointer rounded-r-md bg-zinc-900 text-xs placeholder:text-gray-400"
+        className="input w-[100px] cursor-pointer rounded-r-md bg-transparent text-xs placeholder:text-gray-400"
         onClick={() => {
           const modal = document.getElementById("my_modal_5");
           if (modal) {
