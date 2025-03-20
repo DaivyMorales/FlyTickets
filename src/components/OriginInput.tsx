@@ -7,7 +7,7 @@ type City = {
   countryCode: string;
 };
 
-export default function OriginInput() {
+export default function OriginInput({ setFormik }: { setFormik: any }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<City[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -97,7 +97,9 @@ export default function OriginInput() {
                 key={index}
                 className="cursor-pointer px-4 py-2 text-xs hover:bg-zinc-700"
                 onClick={() => {
-                  setQuery(`${city.city}, ${city.country}`);
+                  const cityString = `${city.city}, ${city.country}`;
+                  setQuery(cityString);
+                  setFormik("origin", cityString); 
                   setIsOpen(false);
                 }}
               >

@@ -3,8 +3,22 @@ import { PiCalendarDotsFill } from "react-icons/pi";
 import { HiMiniCheckBadge } from "react-icons/hi2";
 import { FaPersonRunning, FaBriefcase, FaCrown } from "react-icons/fa6";
 
-function ModalCategory() {
+function ModalCategory({setFormik, setSearchResults} : {setFormik: any, setSearchResults: any}) {
   const [selectedCategory, setSelectedCategory] = useState("Business");
+
+  const handleCategorySelect = (category: string) => {
+    setSelectedCategory(category);
+    // setSearchResults({
+    //   searchParams: {
+    //     category: category,
+    //   }
+    // });
+    setFormik("category", category);
+    const modal = document.getElementById("my_modal_5");
+    if (modal) {
+      (modal as HTMLDialogElement).close();
+    }
+  };
 
   return (
     <div>
@@ -15,8 +29,10 @@ function ModalCategory() {
         Categoría
       </label>
       <button
+        type="button"
         className="input w-[100px] cursor-pointer rounded-r-md bg-transparent text-xs placeholder:text-gray-400"
-        onClick={() => {
+        onClick={(e) => {
+          e.preventDefault();
           const modal = document.getElementById("my_modal_5");
           if (modal) {
             (modal as HTMLDialogElement).showModal();
@@ -34,13 +50,7 @@ function ModalCategory() {
               className={`flex cursor-pointer items-center justify-start gap-3 rounded-lg border p-4 transition-colors hover:bg-zinc-800 ${
                 selectedCategory === "Turista" ? "border-zinc-600 shadow-md" : "border-zinc-700/10"
               }`}
-              onClick={() => {
-                setSelectedCategory("Turista");
-                const modal = document.getElementById("my_modal_5");
-                if (modal) {
-                  (modal as HTMLDialogElement).close();
-                }
-              }}
+              onClick={() => handleCategorySelect("Turista")}
             >
               <div className={`rounded-lg border-[1px] p-2 ${
                 selectedCategory === "Turista" ? "border-zinc-700 shadow-md" : "border-zinc-700/10"
@@ -60,13 +70,7 @@ function ModalCategory() {
               className={`flex cursor-pointer items-center justify-start gap-3 rounded-lg border p-4 transition-colors hover:bg-zinc-800 ${
                 selectedCategory === "Business" ? "border-zinc-600 shadow-md" : "border-zinc-700/10"
               }`}
-              onClick={() => {
-                setSelectedCategory("Business");
-                const modal = document.getElementById("my_modal_5");
-                if (modal) {
-                  (modal as HTMLDialogElement).close();
-                }
-              }}
+              onClick={() => handleCategorySelect("Business")}
             >
               <div className={`rounded-lg border-[1px] p-2 ${
                 selectedCategory === "Business" ? "border-zinc-700 shadow-md" : "border-zinc-700/10"
@@ -85,13 +89,7 @@ function ModalCategory() {
               className={`flex cursor-pointer items-center justify-start gap-3 rounded-lg border p-4 transition-colors hover:bg-zinc-800 ${
                 selectedCategory === "Gold" ? "border-zinc-600 shadow-md" : "border-zinc-700/10"
               }`}
-              onClick={() => {
-                setSelectedCategory("Gold");
-                const modal = document.getElementById("my_modal_5");
-                if (modal) {
-                  (modal as HTMLDialogElement).close();
-                }
-              }}
+              onClick={() => handleCategorySelect("Gold")}
             >
               <div className={`rounded-lg border-[1px] p-2 ${
                 selectedCategory === "Gold" ? "border-zinc-700 shadow-md" : "border-zinc-700/10"
@@ -106,7 +104,6 @@ function ModalCategory() {
               </div>
             </div>
             <form method="dialog">
-              {/* if there is a button in form, it will close the modal */}
               <button className="btn w-[85px] rounded-md bg-blue-700 text-xs">¡Ok!</button>
             </form>
           </div>

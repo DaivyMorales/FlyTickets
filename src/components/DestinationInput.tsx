@@ -7,7 +7,7 @@ type City = {
   countryCode: string;
 };
 
-export default function DestinationInput() {
+export default function DestinationInput({ setFormik }: { setFormik: any }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<City[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -97,7 +97,9 @@ export default function DestinationInput() {
                 key={index}
                 className="cursor-pointer px-4 py-2 text-xs hover:bg-zinc-700"
                 onClick={() => {
-                  setQuery(`${city.city}, ${city.country}`);
+                  const cityString = `${city.city}, ${city.country}`;
+                  setQuery(cityString);
+                  setFormik("destination", cityString); // Update Formik state for the 'destination' field
                   setIsOpen(false);
                 }}
               >
