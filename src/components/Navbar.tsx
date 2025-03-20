@@ -1,5 +1,7 @@
 import React from "react";
 import { signOut, useSession } from "next-auth/react";
+import Booking from "./Booking";
+import { useOpenGlobal } from "./../store/OpenGlobalSlice";
 
 interface NavbarProps {
   children: React.ReactNode;
@@ -8,11 +10,14 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ children }) => {
   const { data: session } = useSession();
 
+  const { openBooking } = useOpenGlobal();
+
   return (
     <div className="bg-zinc-800">
-      <div className="navbar     shadow-sm">
+      {openBooking && <Booking />}
+      <div className="navbar shadow-sm">
         <div className="flex-1">
-          <a className="font-bold text-md">FlyTickets</a>
+          <a className="text-md font-bold">FlyTickets</a>
         </div>
         <div className="flex-none">
           <div className="dropdown dropdown-end">
@@ -62,10 +67,7 @@ const Navbar: React.FC<NavbarProps> = ({ children }) => {
               className="btn btn-ghost btn-circle avatar"
             >
               <div className="w-10 rounded-full">
-                <img
-                  alt="Tailwind CSS Navbar component"
-                  src=""
-                />
+                <img alt="Tailwind CSS Navbar component" src="" />
               </div>
             </div>
             <ul
