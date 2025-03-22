@@ -34,20 +34,20 @@ function calculateFinalPrice(
 
   // Apply distance surcharge
   if (distance > 500) {
-    finalPrice += 100000;
+    finalPrice += 8000; // Reduced from 15000
   }
 
   // Apply category multipliers
   switch (category.toLowerCase()) {
     case "business":
-      finalPrice *= 2.5; // 150% more expensive than tourist
+      finalPrice *= 1.1; // Reduced from 1.2
       break;
     case "gold":
-      finalPrice *= 3.0; // 200% more expensive than tourist
+      finalPrice *= 1.15; // Reduced from 1.3
       break;
     case "tourist":
     default:
-      finalPrice *= 1.0; // Base price
+      finalPrice *= 0.4; // Reduced from 0.6
       break;
   }
 

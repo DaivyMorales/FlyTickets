@@ -1,9 +1,21 @@
 import { useOpenGlobal } from "@/store/OpenGlobalSlice";
-import React, { useRef } from "react";
+import { useSession } from "next-auth/react";
+import React, { useRef, useState, useEffect } from "react";
 
 export default function Booking() {
+  const { data: session } = useSession();
   const { setOpenBooking, selectedFlight } = useOpenGlobal();
   const modalRef = useRef<HTMLDivElement>(null);
+  const [isSending, setIsSending] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, []);
 
   const generateFlightId = () => {
     const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -29,87 +41,144 @@ export default function Booking() {
 
   const bookingId = generateFlightId();
 
+  const handleConfirmBooking = async () => {
+    if (!session?.user?.email) return;
+    
+    try {
+      setIsSending(true);
+      const response = await fetch('/api/email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          bookingId,
+          flight: selectedFlight,
+          userEmail: session.user.email,
+          userName: session.user.name || 'Usuario'
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send email');
+      }
+
+      setEmailSent(true);
+      setShowSuccess(true);
+      setTimeout(() => {
+        setShowSuccess(false);
+        setOpenBooking(false);
+      }, 2000);
+
+    } catch (error) {
+      console.error('Error sending email:', error);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
   return (
-    <div
-      onClick={handleOutsideClick}
-      className="absolute z-50 flex h-full h-screen w-screen flex-col items-center justify-center backdrop-brightness-50"
-    >
-      <div
-        ref={modalRef}
-        className="h-[530px] w-[400px] rounded-md border-[1px] border-zinc-700 bg-zinc-800 px-8 py-4 shadow-inner"
-      >
-        <div className="flex h-full w-full flex-col items-center justify-between gap-4">
-          <div>
-            <h3 className="text-lg font-bold">Confirmación de Reserva</h3>
-            <p className="text-xs text-zinc-500">
-              Lorem ipsum dolor sit amet consectetur, adipisicing elit. Totam
-              nisi quo iure repudiandae maxime ex numquam et rem, explicabo
-              similique.
+    <>
+      {showSuccess && (
+        <div className="fixed inset-x-0 top-4 z-[60] mx-auto w-[90%] max-w-sm animate-fade-in rounded-lg bg-green-800 p-4 shadow-lg">
+          <div className="flex items-center justify-center space-x-2">
+            <svg className="h-6 w-6 text-green-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            <p className="text-center text-sm font-medium text-white">
+              Tu reserva ha sido enviada a tu correo electrónico
             </p>
           </div>
+        </div>
+      )}
+      <div
+        onClick={handleOutsideClick}
+        className="fixed inset-0 z-50 flex flex-col items-center justify-center backdrop-brightness-50"
+      >
+        <div
+          ref={modalRef}
+          className="h-[530px] w-[400px] rounded-md border-[1px] border-zinc-700 bg-zinc-800 px-8 py-4 shadow-inner"
+        >
+          <div className="flex h-full w-full flex-col items-center justify-between gap-4">
+            <div>
+              <h3 className="text-lg font-bold">Confirmación de Reserva</h3>
+              <p className="text-xs text-zinc-500">
+                Confirma los detalles de tu reserva antes de proceder. Al confirmar,
+                recibirás un correo con la información completa del vuelo y las
+                instrucciones siguientes.
+              </p>
+            </div>
 
-          <div className="h-[1px] w-full border-[1px] border-dashed border-zinc-700" />
+            <div className="h-[1px] w-full border-[1px] border-dashed border-zinc-700" />
 
-          <div className="flex w-full flex-col gap-3">
-            <div className="flex w-full justify-between">
-              <p className="text-xs font-semibold">ID Vuelo</p>
-              <p className="text-xs text-zinc-200">{bookingId}</p>
+            <div className="flex w-full flex-col gap-3">
+              <div className="flex w-full justify-between">
+                <p className="text-xs font-semibold">Nombre</p>
+                <p className="text-xs text-zinc-200">{session?.user.name}</p>
+              </div>
+              <div className="flex w-full justify-between">
+                <p className="text-xs font-semibold">Email</p>
+                <p className="text-xs text-zinc-200">{session?.user.email}</p>
+              </div>
+              <div className="flex w-full justify-between">
+                <p className="text-xs font-semibold">ID Vuelo</p>
+                <p className="text-xs text-zinc-200">{bookingId}</p>
+              </div>
+              <div className="flex w-full justify-between">
+                <p className="text-xs font-semibold">Aerolínea</p>
+                <p className="text-xs text-zinc-200">{selectedFlight.airline}</p>
+              </div>
+              <div className="flex w-full justify-between">
+                <p className="text-xs font-semibold">Categoria</p>
+                <p className="text-xs text-zinc-200">{selectedFlight.category}</p>
+              </div>
+              <div className="flex w-full justify-between">
+                <p className="text-xs font-semibold">Hora Salida</p>
+                <p className="text-xs text-zinc-200">
+                  {selectedFlight.departureTime}
+                </p>
+              </div>
+              <div className="flex w-full justify-between">
+                <p className="text-xs font-semibold">Hora Llegada</p>
+                <p className="text-xs text-zinc-200">
+                  {selectedFlight.arrivalTime}
+                </p>
+              </div>
+              <div className="flex w-full justify-between">
+                <p className="text-xs font-semibold">Ciudad de salida</p>
+                <p className="text-xs text-zinc-200">{selectedFlight.origin}</p>
+              </div>
+              <div className="flex w-full justify-between">
+                <p className="text-xs font-semibold">Ciudad de llegada</p>
+                <p className="text-xs text-zinc-200">
+                  {selectedFlight.destination}
+                </p>
+              </div>
+              <div className="flex w-full justify-between">
+                <p className="text-xs font-semibold">Pasajeros</p>
+                <p className="text-xs text-zinc-200">
+                  {selectedFlight.passengers}
+                </p>
+              </div>
+              <div className="flex w-full justify-between">
+                <p className="text-xs font-semibold">Precio</p>
+                <p className="text-xs font-bold text-white">
+                  {selectedFlight.price.toLocaleString()} COP
+                </p>
+              </div>
             </div>
-            <div className="flex w-full justify-between">
-              <p className="text-xs font-semibold">Aerolínea</p>
-              <p className="text-xs text-zinc-200">{selectedFlight.airline}</p>
-            </div>
-            <div className="flex w-full justify-between">
-              <p className="text-xs font-semibold">Categoria</p>
-              <p className="text-xs text-zinc-200">{selectedFlight.category}</p>
-            </div>
-            <div className="flex w-full justify-between">
-              <p className="text-xs font-semibold">Hora Salida</p>
-              <p className="text-xs text-zinc-200">
-                {selectedFlight.departureTime}
-              </p>
-            </div>
-            <div className="flex w-full justify-between">
-              <p className="text-xs font-semibold">Hora Llegada</p>
-              <p className="text-xs text-zinc-200">
-                {selectedFlight.arrivalTime}
-              </p>
-            </div>
-            <div className="flex w-full justify-between">
-              <p className="text-xs font-semibold">Ciudad de salida</p>
-              <p className="text-xs text-zinc-200">{selectedFlight.origin}</p>
-            </div>
-            <div className="flex w-full justify-between">
-              <p className="text-xs font-semibold">Ciudad de llegada</p>
-              <p className="text-xs text-zinc-200">
-                {selectedFlight.destination}
-              </p>
-            </div>
-            <div className="flex w-full justify-between">
-              <p className="text-xs font-semibold">Pasajeros</p>
-              <p className="text-xs text-zinc-200">
-                {selectedFlight.passengers}
-              </p>
-            </div>
-            <div className="flex w-full justify-between">
-              <p className="text-xs font-semibold">Precio</p>
-              <p className="text-xs font-bold text-white">
-                {selectedFlight.price.toLocaleString()} COP
-              </p>
-            </div>
+
+            <div className="h-[1px] w-full border-[1px] border-dashed border-zinc-700" />
+            <button
+              onClick={handleConfirmBooking}
+              disabled={isSending || emailSent}
+              className="btn w-full rounded-md bg-blue-700 text-xs disabled:opacity-50"
+            >
+              {isSending ? 'Enviando...' : emailSent ? 'Enviado' : '¡Confirmo!'}
+            </button>
           </div>
-
-          <div className="h-[1px] w-full border-[1px] border-dashed border-zinc-700" />
-          <button
-            onClick={() => {
-              setOpenBooking(false);
-            }}
-            className="btn w-full rounded-md bg-blue-700 text-xs"
-          >
-            ¡Confirmo!
-          </button>
         </div>
       </div>
-    </div>
+    </>
   );
 }
