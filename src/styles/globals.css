@@ -6,6 +6,8 @@
   themes: light --default, dark --prefersdark, dark;
 }
 
+
+
 /* DatePicker custom styles */
 .react-datepicker {
   @apply bg-zinc-800 border-zinc-700 text-white !important;

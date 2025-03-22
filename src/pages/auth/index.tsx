@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useFormik } from "formik";
 import { signIn, signOut, getSession } from "next-auth/react";
 import { useRouter } from "next/router";
@@ -11,13 +11,14 @@ import LoginForm from "@/components/LoginForm";
 import RegisterForm from "@/components/RegisterForm";
 
 function Auth() {
-  const [registerScreen, setRegisterScreen] = useState(false);
+  const router = useRouter();
+  const { mode } = router.query;
+  const isRegisterMode = mode === "register";
 
   const { data: session, status } = useSession() as {
     data: { user: { name: string } } | null;
     status: string;
   };
-  const router = useRouter();
 
   useEffect(() => {
     if (status === "authenticated") {
@@ -29,8 +30,6 @@ function Auth() {
     return <div>Loading...</div>;
   }
 
-  
-
   return (
     <div className="flex h-screen w-screen items-center justify-center bg-zinc-800">
       <div className="flex w-[430px] max-w-sm flex-col items-center justify-center rounded p-6">
@@ -38,15 +37,15 @@ function Auth() {
           <PiAirplaneFill size={30} className="text-blue-600" />
           <h2 className="mb-4 text-2xl font-bold">Ingresa a FlyTickets</h2>
         </div>
-        {registerScreen ? <LoginForm /> : <RegisterForm />}
+        {isRegisterMode ? <RegisterForm /> : <LoginForm />}
         <div className="divider text-xs"></div>
         <button
           onClick={() => {
-            setRegisterScreen(!registerScreen);
+            router.push(`/auth?mode=${isRegisterMode ? "login" : "register"}`);
           }}
           className="btn w-full bg-zinc-700 text-xs"
         >
-          {registerScreen ? "Crear Nueva Cuenta" : "Iniciar Sesión"}
+          {isRegisterMode ? "Iniciar Sesión" : "Crear Nueva Cuenta"}
         </button>
       </div>
     </div>
