@@ -22,6 +22,7 @@ function Auth() {
 
   useEffect(() => {
     if (status === "authenticated") {
+      // Keep the destination in localStorage when redirecting back to home
       router.push("/");
     }
   }, [status, router]);

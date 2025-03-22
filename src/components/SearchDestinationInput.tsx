@@ -7,31 +7,17 @@ type City = {
   countryCode: string;
 };
 
-type Props = {
-  setFormik: any;
+interface Props {
+  onSelect: (value: string) => void;
   initialValue?: string;
-};
+}
 
-export default function DestinationInput({ setFormik, initialValue }: Props) {
-  const [query, setQuery] = useState("");
+export default function SearchDestinationInput({ onSelect, initialValue }: Props) {
+  const [query, setQuery] = useState(initialValue || "");
   const [results, setResults] = useState<City[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  // Effect to handle initialValue changes
-  useEffect(() => {
-    if (initialValue) {
-      setQuery(initialValue);
-      setFormik("destination", initialValue);
-    } else {
-      const savedDestination = localStorage.getItem("savedDestination");
-      if (savedDestination) {
-        setQuery(savedDestination);
-        setFormik("destination", savedDestination);
-      }
-    }
-  }, [initialValue, setFormik]);
 
   useEffect(() => {
     const fetchCities = async () => {
@@ -46,14 +32,12 @@ export default function DestinationInput({ setFormik, initialValue }: Props) {
           `https://wft-geo-db.p.rapidapi.com/v1/geo/cities?namePrefix=${query}&limit=5&languageCode=es`,
           {
             headers: {
-              "X-RapidAPI-Key":
-                "9810e3a8cdmsh69731c78e1ce926p1c86a7jsn46c865c06eaf",
+              "X-RapidAPI-Key": "9810e3a8cdmsh69731c78e1ce926p1c86a7jsn46c865c06eaf",
               "X-RapidAPI-Host": "wft-geo-db.p.rapidapi.com",
             },
-          },
+          }
         );
         const data = await response.json();
-        // Validate that data and data.data exist and is an array
         if (data && Array.isArray(data.data)) {
           const countries = new Intl.DisplayNames(["es"], { type: "region" });
           setResults(
@@ -61,7 +45,7 @@ export default function DestinationInput({ setFormik, initialValue }: Props) {
               city: item.city,
               country: countries.of(item.countryCode) || item.country,
               countryCode: item.countryCode,
-            })),
+            }))
           );
         } else {
           setResults([]);
@@ -80,26 +64,21 @@ export default function DestinationInput({ setFormik, initialValue }: Props) {
 
   return (
     <div className="relative w-full">
-      <label
-        className="text-neutral-300 mb-2 block text-xs font-medium"
-        htmlFor="password"
-      >
-        Destino
+      <label className="text-neutral-300 mb-2 block text-xs font-medium">
+        ¿A dónde quieres viajar?
       </label>
-      <label className="input relative w-full rounded-r-md bg-zinc-900">
-        <PiAirplaneLandingFill />
+      <label className="input flex w-full items-center gap-2 rounded-md bg-zinc-900">
+        <PiAirplaneLandingFill className="text-zinc-400" />
         <input
           ref={inputRef}
-          className="input-sm w-full"
-          type="text"
+          className="w-full bg-transparent text-xs outline-none"
+          placeholder="Ej: Tokyo, Japón"
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
             setIsOpen(true);
           }}
           onFocus={() => setIsOpen(true)}
-          placeholder="Tokyo, Japón"
-          required
         />
       </label>
 
@@ -118,7 +97,7 @@ export default function DestinationInput({ setFormik, initialValue }: Props) {
                 onClick={() => {
                   const cityString = `${city.city}, ${city.country}`;
                   setQuery(cityString);
-                  setFormik("destination", cityString); // Update Formik state for the 'destination' field
+                  onSelect(cityString);
                   setIsOpen(false);
                 }}
               >
