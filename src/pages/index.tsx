@@ -8,6 +8,7 @@ import { PiAirplaneTakeoffFill, PiCalendarDotsFill } from "react-icons/pi";
 import ModalCategory from "./ModalCategory";
 import Flight from "@/components/Flight";
 import { useFormik } from "formik";
+import ModalHotels from "@/components/ModalHotels";
 
 interface FlightOption {
   id: number;
@@ -15,6 +16,7 @@ interface FlightOption {
   arrivalTime: string;
   price: number;
   airline: string;
+  includeHotel?: boolean;
 }
 
 const HomePage = () => {
@@ -37,7 +39,7 @@ const HomePage = () => {
     endDate: "",
     isRoundTrip: true,
     category: "Bussiness",
-    passengers: 1
+    passengers: 1,
   });
   const [searchResults, setSearchResults] = useState({
     flights: [] as FlightOption[],
@@ -48,8 +50,10 @@ const HomePage = () => {
       endDate: "",
       isRoundTrip: true,
       category: "Bussiness",
-      passengers: 1
-    }
+      passengers: 1,
+      includeHotel: false,
+      hotelStars: 0,
+    },
   });
 
   const handleCalendarClick = (inputRef: React.RefObject<HTMLInputElement>) => {
@@ -110,7 +114,7 @@ const HomePage = () => {
   const generateFlightTimes = (date: string) => {
     const baseDate = new Date(date);
     baseDate.setHours(6, 0, 0, 0);
-    
+
     const numberOfFlights = Math.floor(Math.random() * 4) + 1;
     const times = [];
 
@@ -118,21 +122,24 @@ const HomePage = () => {
       const departureDate = new Date(baseDate);
       const randomHours = Math.floor(Math.random() * 14);
       const randomMinutes = Math.floor(Math.random() * 60);
-      
+
       departureDate.setHours(departureDate.getHours() + randomHours);
       departureDate.setMinutes(randomMinutes);
-      
+
       const arrivalDate = new Date(departureDate);
       const flightDuration = 2 + Math.floor(Math.random() * 2);
       arrivalDate.setHours(arrivalDate.getHours() + flightDuration);
-      
+
       times.push({
         departure: departureDate.toISOString(),
-        arrival: arrivalDate.toISOString()
+        arrival: arrivalDate.toISOString(),
       });
     }
-    
-    return times.sort((a, b) => new Date(a.departure).getTime() - new Date(b.departure).getTime());
+
+    return times.sort(
+      (a, b) =>
+        new Date(a.departure).getTime() - new Date(b.departure).getTime(),
+    );
   };
 
   const formik = useFormik({
@@ -145,34 +152,53 @@ const HomePage = () => {
       category: "Bussiness",
       isRoundTrip: true,
       isOneWay: false,
+      includeHotel: false,
+      hotelStars: 0,
     },
     onSubmit: async (values, { setSubmitting }) => {
+      console.log(values)
       try {
         setIsLoading(true);
         setShowFlights(true);
         setSearchPerformed(true);
-        
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        const airlines = ['Avianca', 'LATAM', 'American Airlines', 'Copa Airlines', 'United Airlines', 'Delta'];
+
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        const airlines = [
+          "Avianca",
+          "LATAM",
+          "American Airlines",
+          "Copa Airlines",
+          "United Airlines",
+          "Delta",
+        ];
         const times = generateFlightTimes(values.startDate);
         const prices = times.map(() => ({
           price: 500000 * (0.8 + Math.random() * 0.7),
-          multiplier: 0.9 + Math.random() * 0.3
+          multiplier: 0.9 + Math.random() * 0.3,
         }));
 
-        const categoryMultiplier = {
-          "Turista": 1,
-          "Business": 1.35,
-          "Gold": 1.70
-        }[values.category] || 1;
-        
+        const categoryMultiplier =
+          {
+            Turista: 1,
+            Business: 1.35,
+            Gold: 1.7,
+          }[values.category] || 1;
+
         const options = times.map((time, index) => ({
           id: index + 1,
           departureTime: time.departure,
           arrivalTime: time.arrival,
-          price: prices[index] ? Math.round(prices[index].price * prices[index].multiplier * categoryMultiplier) : 0,
-          airline: airlines[Math.floor(Math.random() * airlines.length)] || "Unknown Airline",
+          price: prices[index]
+            ? Math.round(
+                prices[index].price *
+                  prices[index].multiplier *
+                  categoryMultiplier,
+              )
+            : 0,
+          airline:
+            airlines[Math.floor(Math.random() * airlines.length)] ||
+            "Unknown Airline",
         }));
 
         setSearchResults({
@@ -184,8 +210,10 @@ const HomePage = () => {
             endDate: values.endDate,
             isRoundTrip: values.isRoundTrip,
             category: values.category,
-            passengers: values.passengers
-          }
+            passengers: values.passengers,
+            includeHotel: values.includeHotel,
+            hotelStars: values.hotelStars,
+          },
         });
       } finally {
         setIsLoading(false);
@@ -207,7 +235,7 @@ const HomePage = () => {
       </div>
     );
   }
-console.log(formik.values)
+  console.log(formik.values);
 
   if (status === "authenticated") {
     return (
@@ -218,7 +246,10 @@ console.log(formik.values)
             className="flex grid w-[800px] grid-cols-2 items-end justify-end gap-4"
           >
             <div className="col-span-2 flex items-end gap-4">
-              <ModalCategory setFormik={formik.setFieldValue} setSearchResults={setSearchResults} />
+              <ModalCategory
+                setFormik={formik.setFieldValue}
+                setSearchResults={setSearchResults}
+              />
               <div>
                 <label
                   className="text-neutral-300 mb-2 block text-xs font-medium"
@@ -266,6 +297,12 @@ console.log(formik.values)
                   />{" "}
                   Solo ida
                 </div>
+              </div>
+              <div className="col-span-2 flex items-end gap-4">
+                <ModalHotels
+                  setFormik={formik.setFieldValue}
+                  setSearchResults={setSearchResults}
+                />
               </div>
             </div>
             <div className="col-span-3 flex items-end justify-center gap-4">
@@ -331,8 +368,8 @@ console.log(formik.values)
                   </p>
                 )}
               </div>
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="btn w-[170px] rounded-md bg-blue-700 text-xs"
                 disabled={isLoading || dateError !== ""}
               >
@@ -342,7 +379,7 @@ console.log(formik.values)
           </form>
         </div>
         {searchPerformed && (
-          <Flight 
+          <Flight
             origin={searchResults.searchParams.origin}
             destination={searchResults.searchParams.destination}
             startDate={searchResults.searchParams.startDate}
@@ -350,6 +387,8 @@ console.log(formik.values)
             isRoundTrip={searchResults.searchParams.isRoundTrip}
             flightOptions={searchResults.flights}
             category={searchResults.searchParams.category}
+            includeHotel={searchResults.searchParams.includeHotel}
+            hotelStars={searchResults.searchParams.hotelStars}
             passengers={searchResults.searchParams.passengers}
             loading={isLoading}
           />

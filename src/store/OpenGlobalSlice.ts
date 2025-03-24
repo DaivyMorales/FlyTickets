@@ -10,6 +10,9 @@ interface SelectedFlight {
   airline: string;
   category: string;
   passengers: number;
+  hotelName: string | null;
+  hotelStars: number | null;
+  numberOfNights: number | null;
 }
 
 export interface OpenGlobalProps {

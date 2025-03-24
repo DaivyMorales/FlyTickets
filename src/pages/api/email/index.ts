@@ -123,6 +123,20 @@ export default async function handler(
                   <span class="label">Pasajeros:</span>
                   <span class="value">${flight.passengers}</span>
                 </div>
+                 ${flight.hotelName ? `
+                <div class="detail-row">
+                  <span class="label">Hotel:</span>
+                  <span class="value">${flight.hotelName}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label">Estrellas del Hotel:</span>
+                  <span class="value">${flight.hotelStars}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label">Noches en el Hotel:</span>
+                  <span class="value">${flight.numberOfNights}</span>
+                </div>
+              ` : ''}
                 <div class="detail-row">
                   <span class="label">Precio Total:</span>
                   <span class="value">${flight.price.toLocaleString()} COP</span>

@@ -8,11 +8,7 @@ function ModalCategory({setFormik, setSearchResults} : {setFormik: any, setSearc
 
   const handleCategorySelect = (category: string) => {
     setSelectedCategory(category);
-    // setSearchResults({
-    //   searchParams: {
-    //     category: category,
-    //   }
-    // });
+  
     setFormik("category", category);
     const modal = document.getElementById("my_modal_5");
     if (modal) {

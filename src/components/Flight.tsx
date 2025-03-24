@@ -17,6 +17,8 @@ interface FlightProps {
     price: number;
     airline: string;
   }[];
+  includeHotel: boolean;
+  hotelStars: number;
   loading?: boolean;
   passengers: number;
 }
@@ -54,11 +56,62 @@ function calculateFinalPrice(
   return Math.round(finalPrice);
 }
 
+// Function to calculate hotel price
+const calculateHotelPrice = (
+  startDate: string,
+  endDate: string,
+  hotelStars: number,
+): number => {
+  if (!startDate || !endDate || !hotelStars) return 0;
+
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const numberOfNights = (end.getTime() - start.getTime()) / (1000 * 3600 * 24);
+
+  let basePrice = 50000; // Base price per night
+
+  switch (hotelStars) {
+    case 1:
+      basePrice *= 0.5;
+      break;
+    case 2:
+      basePrice *= 0.75;
+      break;
+    case 3:
+      basePrice *= 1;
+      break;
+    case 4:
+      basePrice *= 1.25;
+      break;
+    case 5:
+      basePrice *= 1.5;
+      break;
+    default:
+      basePrice *= 1;
+      break;
+  }
+
+  return Math.round(basePrice * numberOfNights);
+};
+
+const generateHotelName = (): string => {
+  const names = [
+    "Hotel Paraiso",
+    "Brisas del Mar",
+    "Montaña Real",
+    "Amanecer Andino",
+    "Sueños Dorados",
+  ];
+  return names[Math.floor(Math.random() * names.length)] ?? "Default Hotel";
+};
+
 function Flight({
   origin,
   destination,
   category,
   startDate,
+  includeHotel,
+  hotelStars,
   endDate,
   isRoundTrip,
   flightOptions,
@@ -136,7 +189,15 @@ function Flight({
             distance,
             category,
           );
-          const totalPrice = calculateTotalPrice(finalPrice);
+          let hotelPrice = 0;
+          if (includeHotel) {
+            hotelPrice = calculateHotelPrice(startDate, endDate, hotelStars);
+          }
+          const totalPrice = calculateTotalPrice(finalPrice) + hotelPrice;
+          const hotelName = generateHotelName();
+          const start = new Date(startDate);
+          const end = new Date(endDate);
+          const numberOfNights = Math.round((end.getTime() - start.getTime()) / (1000 * 3600 * 24));
 
           return (
             <motion.div
@@ -173,6 +234,12 @@ function Flight({
                   <p className="text-xs font-semibold">COP</p>{" "}
                   {totalPrice.toLocaleString()}
                 </h3>
+                {includeHotel && hotelPrice > 0 && (
+                  <p className="text-xs text-gray-400">
+                    +{hotelPrice.toLocaleString()} COP Hotel {hotelName} (
+                    {numberOfNights} Noches)
+                  </p>
+                )}
                 <button
                   onClick={() => {
                     setSelectedFlight({
@@ -184,7 +251,10 @@ function Flight({
                       price: totalPrice,
                       airline: option.airline,
                       category,
-                      passengers
+                      passengers,
+                      hotelName: includeHotel ? hotelName : null,
+                      hotelStars: includeHotel ? hotelStars : null,
+                      numberOfNights: includeHotel ? numberOfNights : null,
                     });
                     setOpenBooking(true);
                   }}

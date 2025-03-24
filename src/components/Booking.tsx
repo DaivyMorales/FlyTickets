@@ -55,7 +55,10 @@ export default function Booking() {
           bookingId,
           flight: selectedFlight,
           userEmail: session.user.email,
-          userName: session.user.name || 'Usuario'
+          userName: session.user.name || 'Usuario',
+          hotelName: selectedFlight.hotelName,
+          hotelStars: selectedFlight.hotelStars,
+          numberOfNights: selectedFlight.numberOfNights,
         }),
       });
 
@@ -97,7 +100,7 @@ export default function Booking() {
       >
         <div
           ref={modalRef}
-          className="h-[530px] w-[400px] rounded-md border-[1px] border-zinc-700 bg-zinc-800 px-8 py-4 shadow-inner"
+          className="h-[630px] w-[400px] rounded-md border-[1px] border-zinc-700 bg-zinc-800 px-8 py-4 shadow-inner"
         >
           <div className="flex h-full w-full flex-col items-center justify-between gap-4">
             <div>
@@ -160,6 +163,22 @@ export default function Booking() {
                   {selectedFlight.passengers}
                 </p>
               </div>
+              {selectedFlight.hotelName && (
+                <>
+                  <div className="flex w-full justify-between">
+                    <p className="text-xs font-semibold">Hotel</p>
+                    <p className="text-xs text-zinc-200">{selectedFlight.hotelName}</p>
+                  </div>
+                  <div className="flex w-full justify-between">
+                    <p className="text-xs font-semibold">Estrellas del Hotel</p>
+                    <p className="text-xs text-zinc-200">{selectedFlight.hotelStars}</p>
+                  </div>
+                  <div className="flex w-full justify-between">
+                    <p className="text-xs font-semibold">Noches en el Hotel</p>
+                    <p className="text-xs text-zinc-200">{selectedFlight.numberOfNights}</p>
+                  </div>
+                </>
+              )}
               <div className="flex w-full justify-between">
                 <p className="text-xs font-semibold">Precio</p>
                 <p className="text-xs font-bold text-white">
