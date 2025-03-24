@@ -246,6 +246,8 @@ function Flight({
                       id: option.id,
                       departureTime: formatTime(option.departureTime),
                       arrivalTime: formatTime(option.arrivalTime),
+                      startDate,
+                      endDate,
                       origin,
                       destination,
                       price: totalPrice,

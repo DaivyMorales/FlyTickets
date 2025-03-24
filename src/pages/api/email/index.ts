@@ -104,6 +104,14 @@ export default async function handler(
                   <span class="value">${flight.category}</span>
                 </div>
                 <div class="detail-row">
+                  <span class="label">Fecha de Inicio:</span>
+                  <span class="value">${flight.startDate}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label">Fecha de Fin:</span>
+                  <span class="value">${flight.endDate}</span>
+                </div>
+                <div class="detail-row">
                   <span class="label">Hora de Salida:</span>
                   <span class="value">${flight.departureTime}</span>
                 </div>

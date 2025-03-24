@@ -60,10 +60,11 @@ model User {
     email         String?   @unique
     emailVerified DateTime?
     image         String?
-    password      String?   // @db.Text
+    password      String? // @db.Text
     accounts      Account[]
     sessions      Session[]
     posts         Post[]
+    bookings      Booking[]
 }
 
 model VerificationToken {
@@ -72,4 +73,24 @@ model VerificationToken {
     expires    DateTime
 
     @@unique([identifier, token])
+}
+
+model Booking {
+    id            String   @id
+    airline       String
+    category      String
+    startDate     DateTime
+    endDate       DateTime
+    departureTime String
+    arrivalTime   String
+    origin        String
+    destination   String
+    passengers    Int
+    hotelName     String?
+    numberOfNights Int?
+    price         String
+    user          User     @relation(fields: [userId], references: [id])
+    userId        String
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
 }

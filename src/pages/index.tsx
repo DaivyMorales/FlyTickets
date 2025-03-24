@@ -235,7 +235,7 @@ const HomePage = () => {
       </div>
     );
   }
-  console.log(formik.values);
+  // console.log(formik.values);
 
   if (status === "authenticated") {
     return (

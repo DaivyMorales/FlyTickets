@@ -2,6 +2,8 @@ import { create } from "zustand";
 
 interface SelectedFlight {
   id: number;
+  startDate: string;
+  endDate: string;
   departureTime: string;
   arrivalTime: string;
   origin: string;
