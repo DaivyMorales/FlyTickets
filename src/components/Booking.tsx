@@ -1,7 +1,7 @@
 import { useOpenGlobal } from "@/store/OpenGlobalSlice";
 import { useSession } from "next-auth/react";
 import React, { useRef, useState, useEffect } from "react";
-import { start } from "repl";
+import { useBookingsStore } from "@/store/BookingsStore";
 
 export default function Booking() {
   const { data: session } = useSession();
@@ -10,6 +10,7 @@ export default function Booking() {
   const [isSending, setIsSending] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const { addBooking } = useBookingsStore();
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -48,7 +49,22 @@ export default function Booking() {
     try {
       setIsSending(true);
 
-      console.log(session.user.id);
+      const newBooking = {
+        id: bookingId,
+        airline: selectedFlight.airline,
+        category: selectedFlight.category,
+        startDate: new Date(selectedFlight.startDate).toISOString(),
+        endDate: new Date(selectedFlight.endDate).toISOString(),
+        departureTime: selectedFlight.departureTime,
+        arrivalTime: selectedFlight.arrivalTime,
+        origin: selectedFlight.origin,
+        destination: selectedFlight.destination,
+        passengers: selectedFlight.passengers,
+        hotelName: selectedFlight.hotelName || undefined,
+        numberOfNights: selectedFlight.numberOfNights || undefined,
+        price: selectedFlight.price.toLocaleString(),
+        userId: session.user.id,
+      };
 
       // Create booking
       const bookingResponse = await fetch("/api/user/booking", {
@@ -56,27 +72,15 @@ export default function Booking() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          id: bookingId,
-          airline: selectedFlight.airline,
-          category: selectedFlight.category,
-          startDate: new Date(selectedFlight.startDate).toISOString(),
-          endDate: new Date(selectedFlight.endDate).toISOString(),
-          departureTime: selectedFlight.departureTime,
-          arrivalTime: selectedFlight.arrivalTime,
-          origin: selectedFlight.origin,
-          destination: selectedFlight.destination,
-          passengers: selectedFlight.passengers,
-          hotelName: selectedFlight.hotelName,
-          numberOfNights: selectedFlight.numberOfNights,
-          price: selectedFlight.price.toLocaleString(),
-          userId: session.user.id,
-        }),
+        body: JSON.stringify(newBooking),
       });
 
       if (!bookingResponse.ok) {
         throw new Error("Failed to create booking");
       }
+
+      // Add to global state
+      addBooking(newBooking);
 
       // Send email
       const response = await fetch("/api/email", {

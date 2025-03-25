@@ -10,9 +10,24 @@ export default async function handler(
   switch (method) {
     case "GET":
       try {
-        // Handle GET request - fetch bookings
-        res.status(200).json({ message: "Get bookings" });
+        const { userId } = req.query;
+
+        if (!userId) {
+          return res.status(400).json({ message: "User ID is required" });
+        }
+
+        const bookings = await db.booking.findMany({
+          where: {
+            userId: String(userId),
+          },
+          orderBy: {
+            startDate: 'desc'
+          }
+        });
+
+        res.status(200).json(bookings);
       } catch (error) {
+        console.error("Error fetching bookings:", error);
         res.status(500).json({ error: "Failed to fetch bookings" });
       }
       break;
@@ -80,8 +95,29 @@ export default async function handler(
       }
       break;
 
+    case "DELETE":
+      try {
+        const { bookingId } = req.query;
+
+        if (!bookingId) {
+          return res.status(400).json({ message: "Booking ID is required" });
+        }
+
+        await db.booking.delete({
+          where: {
+            id: String(bookingId),
+          },
+        });
+
+        res.status(200).json({ message: "Booking deleted successfully" });
+      } catch (error) {
+        console.error("Error deleting booking:", error);
+        res.status(500).json({ error: "Failed to delete booking" });
+      }
+      break;
+
     default:
-      res.setHeader("Allow", ["GET", "POST"]);
+      res.setHeader("Allow", ["GET", "POST", "DELETE"]);
       res.status(405).end(`Method ${method} Not Allowed`);
   }
 }
