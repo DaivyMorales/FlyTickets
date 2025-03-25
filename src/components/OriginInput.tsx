@@ -14,49 +14,53 @@ export default function OriginInput({ setFormik }: { setFormik: any }) {
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    const fetchCities = async () => {
-      if (query.length < 2) {
-        setResults([]);
-        return;
-      }
+  const fetchCities = async () => {
+    if (query.length < 2) {
+      setResults([]);
+      return;
+    }
 
-      setLoading(true);
-      try {
-        const response = await fetch(
-          `https://wft-geo-db.p.rapidapi.com/v1/geo/cities?namePrefix=${query}&limit=5&languageCode=es`,
-          {
-            headers: {
-              "X-RapidAPI-Key":
-                "9810e3a8cdmsh69731c78e1ce926p1c86a7jsn46c865c06eaf",
-              "X-RapidAPI-Host": "wft-geo-db.p.rapidapi.com",
-            },
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `https://wft-geo-db.p.rapidapi.com/v1/geo/cities?namePrefix=${query}&limit=5&languageCode=es`,
+        {
+          headers: {
+            "X-RapidAPI-Key":
+              "9810e3a8cdmsh69731c78e1ce926p1c86a7jsn46c865c06eaf",
+            "X-RapidAPI-Host": "wft-geo-db.p.rapidapi.com",
           },
+        },
+      );
+      const data = await response.json();
+      if (data && Array.isArray(data.data)) {
+        const countries = new Intl.DisplayNames(["es"], { type: "region" });
+        setResults(
+          data.data.map((item: any) => ({
+            city: item.city,
+            country: countries.of(item.countryCode) || item.country,
+            countryCode: item.countryCode,
+          })),
         );
-        const data = await response.json();
-        // Validate that data and data.data exist and is an array
-        if (data && Array.isArray(data.data)) {
-          const countries = new Intl.DisplayNames(["es"], { type: "region" });
-          setResults(
-            data.data.map((item: any) => ({
-              city: item.city,
-              country: countries.of(item.countryCode) || item.country,
-              countryCode: item.countryCode,
-            })),
-          );
-        } else {
-          setResults([]);
-        }
-      } catch (error) {
-        console.error("Error al buscar ciudades:", error);
+      } else {
         setResults([]);
-      } finally {
-        setLoading(false);
       }
-    };
+    } catch (error) {
+      console.error("Error al buscar ciudades:", error);
+      setResults([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const timeoutId = setTimeout(fetchCities, 300);
-    return () => clearTimeout(timeoutId);
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      void fetchCities();
+    }, 300);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
   }, [query]);
 
   return (

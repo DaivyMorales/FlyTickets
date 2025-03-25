@@ -74,7 +74,10 @@ export default function DestinationInput({ setFormik, initialValue }: Props) {
       }
     };
 
-    const timeoutId = setTimeout(fetchCities, 300);
+    const timeoutId = setTimeout(() => {
+      void fetchCities();
+    }, 300);
+    
     return () => clearTimeout(timeoutId);
   }, [query]);
 
